@@ -1,16 +1,16 @@
 # https://github.com/line/line-bot-sdk-python#synopsis
-from flask import Flask, request, abort
+import json
 import os
+import random
+
+from flask import Flask, request, abort
 
 from linebot import (
-    LineBotApi, WebhookHandler
-)
+    LineBotApi, WebhookHandler)
 from linebot.exceptions import (
-    InvalidSignatureError
-)
+    InvalidSignatureError)
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
-)
+    MessageEvent, TextMessage, TextSendMessage)
 
 app = Flask(__name__)
 
@@ -21,6 +21,9 @@ YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
+with open('stations.json', encoding='utf-8') as f:
+    line_stations = json.loads(f.read())
+
 
 @app.route("/")
 def hello_world():
@@ -29,7 +32,6 @@ def hello_world():
 
 @app.route("/callback", methods=['POST'])
 def callback():
-    print('Get inside the callback() function')
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
@@ -48,9 +50,19 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    print(f'event: {event}')
+    input_text = event.message.text
+    if input_text.endswith('集合場所一覧'):
+        pass
+    elif input_text.endswith('集合場所は？') or input_text.endswith('集合場所は?'):
+        line = random.choice(list(line_stations.keys()))
+        station = random.choice(line_stations[line])
+        output_text = f'{station}集合'
+    else:
+        return
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.text))
+        TextSendMessage(text=output_text))
 
 
 if __name__ == "__main__":
