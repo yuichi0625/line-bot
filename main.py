@@ -1,7 +1,9 @@
 # https://github.com/line/line-bot-sdk-python#synopsis
+import itertools
 import json
 import os
 import random
+import re
 
 from flask import Flask, request, abort
 
@@ -23,6 +25,9 @@ handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
 with open('stations.json', encoding='utf-8') as f:
     line_stations = json.loads(f.read())
+catalog_regex = re.compile(r'集合場所一覧(?=$|。)')
+station_regex = re.compile(r'集合場所は(?=\?|？)')
+lines_regex = re.compile(r'[^と].*?(?=と|で)')
 
 
 @app.route("/")
@@ -50,19 +55,49 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    print(f'event: {event}')
     input_text = event.message.text
-    if input_text.endswith('集合場所一覧'):
-        pass
-    elif input_text.endswith('集合場所は？') or input_text.endswith('集合場所は?'):
-        line = random.choice(list(line_stations.keys()))
-        station = random.choice(line_stations[line])
-        output_text = f'{station}集合'
+    is_catalog = bool(catalog_regex.search(input_text))
+    is_station = bool(station_regex.search(input_text))
+    lines = lines_regex.findall(input_text)
+
+    output_text = None
+    if is_catalog:
+        output_text = extract_catalog(lines)
+    elif is_station:
+        output_text = extract_station(lines)
+
+    if output_text is not None:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=output_text))
+
+
+def extract_catalog(lines):
+    text = ''
+    if not lines:
+        lines = line_stations.keys()
+    for line in lines:
+        text += f'{line}\n  '
+        stations = line_stations.get(line)
+        if stations is None:
+            text += '候補にありません。\n'
+        else:
+            text += '\n  '.join(stations) + '\n'
+    return text
+
+
+def extract_station(lines):
+    if not lines:
+        lines = list(line_stations.keys())
     else:
-        return
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=output_text))
+        lines = [line for line in lines if line in line_stations.keys()]
+    if not lines:
+        text = '路線を見直してください。'
+    else:
+        line = random.choice(lines)
+        station = random.choice(line_stations[line])
+        text = f'{station}！'
+    return text
 
 
 if __name__ == "__main__":
