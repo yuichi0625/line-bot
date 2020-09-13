@@ -1,5 +1,4 @@
 # https://github.com/line/line-bot-sdk-python#synopsis
-import itertools
 import json
 import os
 import random
@@ -24,7 +23,7 @@ line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
 with open('stations.json', encoding='utf-8') as f:
-    line_stations = json.loads(f.read())
+    line_stations_dict = json.loads(f.read())
 catalog_regex = re.compile(r'集合場所一覧(?=$|。)')
 station_regex = re.compile(r'集合場所は(?=\?|？)')
 line_name_regex = re.compile(r'[^と].*?(?=と|で)')
@@ -62,7 +61,7 @@ def handle_message(event):
 
     output_text = None
     if input_text in {'路線一覧', '路線一覧。'}:
-        output_text = '\n'.join([line for line in line_stations.keys()])
+        output_text = '\n'.join([line for line in line_stations_dict.keys()])
     elif is_catalog:
         output_text = extract_catalog(lines)
     elif is_station:
@@ -74,27 +73,13 @@ def handle_message(event):
             TextSendMessage(text=output_text))
 
 
-# def extract_catalog(lines):
-#     text = ''
-#     if not lines:
-#         lines = line_stations.keys()
-#     for line in lines:
-#         text += f'{line}\n    '
-#         stations = line_stations.get(line)
-#         if stations is None:
-#             text += '候補にありません。\n'
-#         else:
-#             text += '\n    '.join(stations) + '\n'
-#     return text.strip()
-
-
 def extract_catalog(lines):
     text = ''
     if not lines:
-        lines = line_stations.keys()
+        lines = line_stations_dict.keys()
     for line in lines:
         text += f'■{line}\n    '
-        stations = line_stations.get(line)
+        stations = line_stations_dict.get(line)
         if stations is None:
             text += '候補にありません。\n'
         else:
@@ -104,14 +89,14 @@ def extract_catalog(lines):
 
 def extract_station(lines):
     if not lines:
-        lines = list(line_stations.keys())
+        lines = list(line_stations_dict.keys())
     else:
-        lines = [line for line in lines if line in line_stations.keys()]
+        lines = [line for line in lines if line in line_stations_dict.keys()]
     if not lines:
         text = '路線を見直してください。'
     else:
         line = random.choice(lines)
-        station = random.choice(line_stations[line])
+        station = random.choice(line_stations_dict[line])
         text = f'{line}の{station}駅！'
     return text.strip()
 
