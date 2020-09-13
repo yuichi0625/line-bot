@@ -74,17 +74,31 @@ def handle_message(event):
             TextSendMessage(text=output_text))
 
 
-def extract_catalog(lines, line_only=False):
+# def extract_catalog(lines):
+#     text = ''
+#     if not lines:
+#         lines = line_stations.keys()
+#     for line in lines:
+#         text += f'{line}\n    '
+#         stations = line_stations.get(line)
+#         if stations is None:
+#             text += '候補にありません。\n'
+#         else:
+#             text += '\n    '.join(stations) + '\n'
+#     return text.strip()
+
+
+def extract_catalog(lines):
     text = ''
     if not lines:
         lines = line_stations.keys()
     for line in lines:
-        text += f'{line}\n    '
+        text += f'■{line}\n    '
         stations = line_stations.get(line)
         if stations is None:
             text += '候補にありません。\n'
         else:
-            text += '\n    '.join(stations) + '\n'
+            text += '　'.join(stations) + '\n'
     return text.strip()
 
 
@@ -98,7 +112,7 @@ def extract_station(lines):
     else:
         line = random.choice(lines)
         station = random.choice(line_stations[line])
-        text = f'{line}の{station}！'
+        text = f'{line}の{station}駅！'
     return text.strip()
 
 
