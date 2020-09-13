@@ -26,8 +26,9 @@ handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 with open('stations.json', encoding='utf-8') as f:
     line_stations = json.loads(f.read())
 catalog_regex = re.compile(r'集合場所一覧(?=$|。)')
+line_regex = re.compile(r'路線一覧(?=$|。)')
 station_regex = re.compile(r'集合場所は(?=\?|？)')
-lines_regex = re.compile(r'[^と].*?(?=と|で)')
+line_name_regex = re.compile(r'[^と].*?(?=と|で)')
 
 
 @app.route("/")
@@ -57,12 +58,15 @@ def callback():
 def handle_message(event):
     input_text = event.message.text
     is_catalog = bool(catalog_regex.search(input_text))
+    is_line = bool(line_regex.search(input_text))
     is_station = bool(station_regex.search(input_text))
-    lines = lines_regex.findall(input_text)
+    lines = line_name_regex.findall(input_text)
 
     output_text = None
     if is_catalog:
         output_text = extract_catalog(lines)
+    elif is_line:
+        output_text = extract_catalog(lines, line_only=True)
     elif is_station:
         output_text = extract_station(lines)
 
@@ -72,17 +76,19 @@ def handle_message(event):
             TextSendMessage(text=output_text))
 
 
-def extract_catalog(lines):
+def extract_catalog(lines, line_only=False):
     text = ''
     if not lines:
         lines = line_stations.keys()
     for line in lines:
-        text += f'{line}\n  '
-        stations = line_stations.get(line)
-        if stations is None:
-            text += '候補にありません。\n'
-        else:
-            text += '\n  '.join(stations) + '\n'
+        text += f'{line}\n'
+        if not line_only:
+            text += '    '
+            stations = line_stations.get(line)
+            if stations is None:
+                text += '候補にありません。\n'
+            else:
+                text += '\n    '.join(stations) + '\n'
     return text
 
 
