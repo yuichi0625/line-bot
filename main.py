@@ -78,7 +78,7 @@ def extract_catalog(lines):
     if not lines:
         lines = line_stations_dict.keys()
     for line in lines:
-        text += f'■{line}\n    '
+        text += f'■{line}\n'
         stations = line_stations_dict.get(line)
         if stations is None:
             text += '候補にありません。\n'
