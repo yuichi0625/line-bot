@@ -1,6 +1,7 @@
 import json
 import random
 import re
+from collections import defaultdict
 
 import numpy as np
 
@@ -14,6 +15,10 @@ class Bot:
         with open('tools/line_stations.json', encoding='utf-8') as f:
             self.line_stations_dict = json.loads(f.read())
             self.line_keys = self.line_stations_dict.keys()
+            self.station_lines_dict = defaultdict(list)
+            for line, stations in self.line_stations_dict.items():
+                for station in stations:
+                    self.station_lines_dict[station].append(line)
         with open('tools/station_lon_lat.json', encoding='utf-8') as f:
             self.station_lon_lat_dict = {
                 sta: [float(n) for n in lon_lat] for sta, lon_lat in json.loads(f.read()).items()}
@@ -107,9 +112,9 @@ class Bot:
             output += f'- {station}駅\n'
         for station in invalid_stations:
             output += f'- {station}駅（無効）\n'
-        output += 'の中間地点にある駅は、\n'
+        output += '\nの中間にある駅は、\n\n'
         for i, station in enumerate(intermediate_stations, 1):
-            output += f'{i}. {station}駅\n'
+            output += f"{i}. {station}駅（{', '.join(self.station_lines_dict[station])}）\n"
         return output.strip()
 
     @staticmethod
