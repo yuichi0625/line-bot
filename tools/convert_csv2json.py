@@ -8,7 +8,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--line_csv', default='line20200619free.csv')
     parser.add_argument('-s', '--station_csv', default='station20200619free.csv')
-    parser.add_argument('-u', '--lines_config', default='lines_config.json')
+    parser.add_argument('-c', '--config', default='config.json')
     args = parser.parse_args()
 
     # returns {line_name: line_cd}
@@ -35,12 +35,12 @@ def main():
                 [row[idx_station_name], row[idx_lon], row[idx_lat]])
 
     # returns {line_name: line name defined by user}
-    with open(args.lines_config, encoding='utf-8') as f:
-        lines_config_dict = json.loads(f.read())
+    with open(args.config, encoding='utf-8') as f:
+        lines_dict = json.loads(f.read())
 
     line_stations_dict = defaultdict(list)
     station_lon_lat_dict = {}
-    for line_name, line_name_by_user in lines_config_dict.items():
+    for line_name, line_name_by_user in lines_dict.items():
         line_cd = line_name_cd_dict.get(line_name)
         if line_cd:
             station_infos = line_cd_station_info_dict[line_cd]
