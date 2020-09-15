@@ -24,7 +24,7 @@
 # 準備
 ## LINE DevelopersとHerokuの登録・設定
 以下のサイトを参考にしました。
-- [Python + HerokuでLINE BOTを作ってみた](https://qiita.com/shimajiri/items/cf7ccf69d184fdb2fb26#flask%E3%81%A8line-bot-sdk%E3%82%92%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB)
+- [Python + HerokuでLINE BOTを作ってみた](https://qiita.com/shimajiri/items/cf7ccf69d184fdb2fb26)
 - [HerokuにRailsアプリをデプロイする手順](https://qiita.com/NaokiIshimura/items/eee473675d624a17310f)
 - [PythonでLine botを作ってみた](https://qiita.com/kro/items/67f7510b36945eb9689b)
 - [Heroku操作 CLI](https://qiita.com/ntkgcj/items/9e812220881d671b6bff)
