@@ -12,6 +12,8 @@ class Bot:
         self.spaces = '    '
         self.regex = re.compile(r'[\s,、]')
         self.database_url = os.environ.get('DATABASE_URL')
+        self.lines = list(
+            {line[0] for line in self.retrieve_data("select line from stations;")})
 
     def retrieve_data(self, sql):
         with psycopg2.connect(self.database_url) as conn:
@@ -54,11 +56,12 @@ class Bot:
     def retrieve_random_station(self, lines):
         text = ''
         for line in lines:
-            sql = f"select station from stations where line = '{line}';"
-            stations = {st[0] for st in self.retrieve_data(sql)}
-            if stations:
+            db_lines = [ln for ln in self.lines if ln.endswith(line)]
+            for db_line in db_lines:
+                sql = f"select station from stations where line = '{db_line}';"
+                stations = {st[0] for st in self.retrieve_data(sql)}
                 station = random.choice(list(stations))
-                text += f'{line}：\n{self.spaces}{station}駅！\n'
+                text += f'{db_line}：{station}駅！\n'
         if not text:
             text += '有効な路線名を入れてください。'
         return text.strip()
