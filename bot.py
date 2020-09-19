@@ -22,7 +22,9 @@ class Bot:
 
     def reply_to_text(self, text):
         words = [word for word in self.regex.split(text) if word]
-        if words[0] in {'路線一覧', 'list', 'listo'}:
+        if len(words) <= 1:
+            reply = None
+        elif words[0] in {'路線一覧', 'list', 'listo'}:
             reply = self.retrieve_line_list(words[1])
         elif words[0] in {'ランダム', 'random', 'hazarda'}:
             reply = self.retrieve_random_station()
@@ -35,9 +37,10 @@ class Bot:
     def retrieve_line_list(self, pref):
         sql = f"select line from stations where pref = '{pref}';"
         lines = {line[0] for line in self.retrieve_data(sql)}
+        lines = sorted(list(lines))
         text = f'{pref}：\n'
         for line in lines:
-            text += f'  {line}\n'
+            text += f'    {line}\n'
         return text.strip()
 
     def retrieve_random_station(self):
