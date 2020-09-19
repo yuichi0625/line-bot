@@ -1,4 +1,3 @@
-import json
 import os
 import random
 import re
@@ -10,6 +9,7 @@ import psycopg2
 
 class Bot:
     def __init__(self):
+        self.spaces = '    '
         self.regex = re.compile(r'[\s,、]')
         self.database_url = os.environ.get('DATABASE_URL')
 
@@ -27,7 +27,7 @@ class Bot:
         elif words[0] in {'路線一覧', 'list', 'listo'}:
             reply = self.retrieve_line_list(words[1])
         elif words[0] in {'ランダム', 'random', 'hazarda'}:
-            reply = self.retrieve_random_station()
+            reply = self.retrieve_random_station(words[1:])
         elif words[0] in {'中間地点', 'center', 'centro'}:
             reply = self.retrieve_center_station()
         else:
@@ -35,16 +35,33 @@ class Bot:
         return reply
 
     def retrieve_line_list(self, pref):
+        text = f'{pref}：\n'
         sql = f"select line from stations where pref = '{pref}';"
         lines = {line[0] for line in self.retrieve_data(sql)}
-        lines = sorted(list(lines))
-        text = f'{pref}：\n'
-        for line in lines:
-            text += f'    {line}\n'
+        if lines:
+            lines = sorted(list(lines))
+            for line in lines:
+                text += f'{self.spaces}{line}\n'
+        else:
+            if pref in {'北海道', '青森県', '鹿児島県', '沖縄県'}:
+                text += f'''
+                    {self.spaces}リソース不足でありません。\n
+                    {self.spaces}大変申し訳ありません...！'''
+            else:
+                text += f'{self.spaces}都道府県名を入れてください。'
         return text.strip()
 
-    def retrieve_random_station(self):
-        return
+    def retrieve_random_station(self, lines):
+        text = ''
+        for line in lines:
+            sql = f"select station from stations where line = '{line}';"
+            stations = {st[0] for st in self.retrieve_data(sql)}
+            if stations:
+                station = random.choice(list(stations))
+                text += f'{line}：\n{self.spaces}{station}駅！\n'
+        if not text:
+            text += '有効な路線名を入れてください。'
+        return text.strip()
 
     def retrieve_center_station(self):
         return
