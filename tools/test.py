@@ -8,6 +8,6 @@ pref = '香川県'
 with psycopg2.connect(DATABASE_URL) as conn:
     with conn.cursor() as cur:
         cur.execute(
-            f"select line from stations where pref = '{pref}'';")
+            f"select line from stations where pref = '{pref}';")
         rows = cur.fetchall()
         print(rows)
