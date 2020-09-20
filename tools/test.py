@@ -1,13 +1,15 @@
 import os
 import psycopg2
+from psycopg2.extras import NamedTupleCursor
 
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
-pref = '香川県'
 
 with psycopg2.connect(DATABASE_URL) as conn:
-    with conn.cursor() as cur:
+    with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
         cur.execute(
-            f"select line from stations where pref = '{pref}';")
+            f"select station, line from stations;")
         rows = cur.fetchall()
-        print(rows)
+        row = rows[0]
+        print(f'row: {row}')
+        print(f'row.line: {row.line}')
