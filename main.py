@@ -54,7 +54,7 @@ def handle_message(event):
     insight = line_bot_api.get_insight_demographic()
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=insight.areas)))
+        TextSendMessage(text=insight.areas))
 
 
 if __name__ == "__main__":
