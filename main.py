@@ -2,12 +2,9 @@
 import os
 
 from flask import Flask, request, abort
-from linebot import (
-    LineBotApi, WebhookHandler)
-from linebot.exceptions import (
-    InvalidSignatureError)
-from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage)
+from linebot import LineBotApi, WebhookHandler
+from linebot.exceptions import InvalidSignatureError
+from linebot.models import MessageEvent, TextMessage, TextSendMessage
 
 from bot import Bot
 
@@ -48,12 +45,16 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    input_text = event.message.text
-    output_text = bot.reply_to_text(input_text)
-    if output_text is not None:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=output_text))
+    # input_text = event.message.text
+    # output_text = bot.reply_to_text(input_text)
+    # if output_text is not None:
+    #     line_bot_api.reply_message(
+    #         event.reply_token,
+    #         TextSendMessage(text=output_text))
+    insight = line_bot_api.get_insight_demographic()
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=insight.areas)))
 
 
 if __name__ == "__main__":
