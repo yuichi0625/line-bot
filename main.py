@@ -87,7 +87,8 @@ def handle_message(event):
         msg = text
     else:
         msg = None
-    line_bot_api.reply_message(event.reply_token, messages=msg)
+    if msg is not None:
+        line_bot_api.reply_message(event.reply_token, messages=msg)
 
 
 if __name__ == "__main__":
