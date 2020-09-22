@@ -24,10 +24,31 @@ RANDOM = 'choose_station_randomly'
 CENTER = 'calculate_center_station'
 mode = None
 
-
-@app.route("/")
-def hello_world():
-    return "hello world!"
+CAROUSEL_TEMPLATE = TemplateSendMessage(
+    alt_text='Carousel template',
+    template=CarouselTemplate(
+        columns=[
+            CarouselColumn(
+                title='路線一覧',
+                text='都道府県の路線一覧を表示します。',
+                actions=[
+                    PostbackAction(
+                        label='都道府県を入力',
+                        data=SHOW)]),
+            CarouselColumn(
+                title='駅名選択',
+                text='指定した都道府県／路線からランダムに一駅選びます。',
+                actions=[
+                    PostbackAction(
+                        label='都道府県／路線を入力',
+                        data=RANDOM)]),
+            CarouselColumn(
+                title='中間地点',
+                text='指定した駅の中間地点にある駅を算出します。',
+                actions=[
+                    PostbackAction(
+                        label='駅を入力',
+                        data=CENTER)])]))
 
 
 @app.route("/callback", methods=['POST'])
@@ -52,47 +73,26 @@ def handle_postback(event):
     if data == SHOW:
         mode = SHOW
         text = '都道府県名を入力してください。'
-    line_bot_api.reply_message(
-        event.reply_token,
-        messages=TextSendMessage(text=text))
+        msg = TextSendMessage(text=text)
+    elif data == RANDOM:
+        mode = RANDOM
+        text = '都道府県名か路線名を入力してください。'
+        msg = TextSendMessage(text=text)
+    line_bot_api.reply_message(event.reply_token, messages=msg)
 
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     global mode
-    carousel_template_message = TemplateSendMessage(
-        alt_text='Carousel template',
-        template=CarouselTemplate(
-            columns=[
-                CarouselColumn(
-                    title='路線一覧',
-                    text='都道府県の路線一覧を表示します。',
-                    actions=[
-                        PostbackAction(
-                            label='都道府県を入力',
-                            data=SHOW)]),
-                CarouselColumn(
-                    title='駅名選択',
-                    text='指定した都道府県／路線からランダムに一駅選びます。',
-                    actions=[
-                        PostbackAction(
-                            label='都道府県／路線を入力',
-                            data=RANDOM)]),
-                CarouselColumn(
-                    title='中間地点',
-                    text='指定した駅の中間地点にある駅を算出します。',
-                    actions=[
-                        PostbackAction(
-                            label='駅を入力',
-                            data=CENTER)])]))
-
     input_text = event.message.text.strip()
     if input_text == '集合場所':
-        msg = carousel_template_message
+        msg = CAROUSEL_TEMPLATE
     elif mode == SHOW:
         output_text = retrieve_line_list(input_text)
         msg = TextSendMessage(text=output_text)
         mode = None
+    elif mode == RANDOM:
+        pass
     else:
         msg = None
     if msg is not None:
