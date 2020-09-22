@@ -6,7 +6,9 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     MessageEvent, TextMessage, TemplateSendMessage, CarouselTemplate, CarouselColumn,
-    PostbackAction, MessageAction, URIAction, PostbackEvent, TextSendMessage)
+    PostbackAction, PostbackEvent, TextSendMessage)
+
+from bot import retrieve_line_list
 
 app = Flask(__name__)
 
@@ -63,28 +65,34 @@ def handle_message(event):
         template=CarouselTemplate(
             columns=[
                 CarouselColumn(
-                    # thumbnail_image_url='https://example.com/item1.jpg',
                     title='路線一覧',
-                    text='都道府県の路線一覧を表示',
+                    text='都道府県の路線一覧を表示します。',
                     actions=[
                         PostbackAction(
                             label='都道府県を入力',
                             data=SHOW)]),
                 CarouselColumn(
-                    # thumbnail_image_url='https://example.com/item2.jpg',
-                    title='this is menu2',
-                    text='description2',
+                    title='駅名選択',
+                    text='指定した都道府県／路線からランダムに一駅選びます。',
                     actions=[
                         PostbackAction(
-                            label='postback2',
-                            display_text='postback text2',
-                            data='action=buy&itemid=2')])]))
+                            label='都道府県／路線を入力',
+                            data=RANDOM)]),
+                CarouselColumn(
+                    title='中間地点',
+                    text='指定した駅の中間地点にある駅を算出します。',
+                    actions=[
+                        PostbackAction(
+                            label='駅を入力',
+                            data=CENTER)])]))
 
-    text = event.message.text.strip()
-    if text == '集合場所':
+    input_text = event.message.text.strip()
+    if input_text == '集合場所':
         msg = carousel_template_message
     elif mode == SHOW:
-        msg = text
+        output_text = retrieve_line_list(input_text)
+        msg = TextSendMessage(text=output_text)
+        mode = None
     else:
         msg = None
     if msg is not None:
