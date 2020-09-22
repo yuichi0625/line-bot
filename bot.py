@@ -4,7 +4,7 @@ import random
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 from linebot.models import (
-    TextMessage, TemplateSendMessage, CarouselTemplate, CarouselColumn, TextSendMessage, PostbackAction, ButtonsTemplate)
+    TemplateSendMessage, CarouselTemplate, CarouselColumn, TextSendMessage, PostbackAction, ButtonsTemplate)
 
 SHOW = 'show_line_list'
 RANDOM = 'choose_station_randomly'
@@ -69,6 +69,9 @@ class Bot:
         elif self.mode == RANDOM:
             msg = self.retrieve_random_station(text)
         # 中間地点
+        # それ以外
+        else:
+            msg = None
         if isinstance(msg, str):
             msg = TextSendMessage(text=msg)
         return msg
