@@ -17,6 +17,11 @@ YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
+SHOW = 'show_line_list'
+RANDOM = 'choose_station_randomly'
+CENTER = 'calculate_center_station'
+mode = None
+
 
 @app.route("/")
 def hello_world():
@@ -40,8 +45,10 @@ def callback():
 
 @handler.add(PostbackEvent)
 def handle_postback(event):
+    global mode
     data = event.postback.data
-    if data == 'show_line_list':
+    if data == SHOW:
+        mode = SHOW
         text = '都道府県名を入力してください。'
     line_bot_api.reply_message(
         event.reply_token,
@@ -50,21 +57,21 @@ def handle_postback(event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    global mode
     carousel_template_message = TemplateSendMessage(
         alt_text='Carousel template',
         template=CarouselTemplate(
             columns=[
                 CarouselColumn(
-                    thumbnail_image_url='https://example.com/item1.jpg',
+                    # thumbnail_image_url='https://example.com/item1.jpg',
                     title='路線一覧',
-                    text='各都道府県の路線一覧を表示',
+                    text='都道府県の路線一覧を表示',
                     actions=[
                         PostbackAction(
                             label='都道府県を入力',
-                            #display_text='test',
-                            data='show_line_list')]),
+                            data=SHOW)]),
                 CarouselColumn(
-                    thumbnail_image_url='https://example.com/item2.jpg',
+                    # thumbnail_image_url='https://example.com/item2.jpg',
                     title='this is menu2',
                     text='description2',
                     actions=[
@@ -73,11 +80,12 @@ def handle_message(event):
                             display_text='postback text2',
                             data='action=buy&itemid=2')])]))
 
-    print(event)
-
-    line_bot_api.reply_message(
-        event.reply_token,
-        messages=carousel_template_message)
+    text = event.message.text.strip()
+    if text == '集合場所':
+        msg = carousel_template_message
+    elif mode == SHOW:
+        msg = text
+    line_bot_api.reply_message(event.reply_token, messages=msg)
 
 
 if __name__ == "__main__":
