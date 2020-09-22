@@ -85,6 +85,8 @@ def handle_message(event):
         msg = carousel_template_message
     elif mode == SHOW:
         msg = text
+    else:
+        msg = None
     line_bot_api.reply_message(event.reply_token, messages=msg)
 
 
