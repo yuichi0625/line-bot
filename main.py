@@ -78,6 +78,8 @@ def handle_message(event):
                             label='uri2',
                             uri='http://example.com/2')])]))
 
+    print(event.message.text)
+
     line_bot_api.reply_message(
         event.reply_token,
         messages=carousel_template_message)
