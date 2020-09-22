@@ -6,7 +6,7 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     MessageEvent, TextMessage, TemplateSendMessage, CarouselTemplate, CarouselColumn,
-    PostbackAction, MessageAction, URIAction, PostbackEvent)
+    PostbackAction, MessageAction, URIAction, PostbackEvent, TextSendMessage)
 
 app = Flask(__name__)
 
@@ -40,7 +40,12 @@ def callback():
 
 @handler.add(PostbackEvent)
 def handle_postback(event):
-    print(event)
+    data = event.postback.data
+    if data == 'show_line_list':
+        text = '都道府県名を入力してください。'
+    line_bot_api.reply_message(
+        event.reply_token,
+        messages=TextSendMessage(text=text))
 
 
 @handler.add(MessageEvent, message=TextMessage)
@@ -50,20 +55,14 @@ def handle_message(event):
         template=CarouselTemplate(
             columns=[
                 CarouselColumn(
-                    thumbnail_image_url='https://example.com/item1.jpg',
-                    title='this is menu1',
-                    text='description1',
+                    # thumbnail_image_url='https://example.com/item1.jpg',
+                    title='路線一覧',
+                    text='各都道府県の路線一覧を表示',
                     actions=[
                         PostbackAction(
-                            label='postback1',
-                            display_text='postback text1',
-                            data='asdf'),
-                        MessageAction(
-                            label='message1',
-                            text='message text1'),
-                        URIAction(
-                            label='uri1',
-                            uri='http://example.com/1')]),
+                            label='都道府県を入力',
+                            # display_text='postback text1',
+                            data='show_line_list')]),
                 CarouselColumn(
                     thumbnail_image_url='https://example.com/item2.jpg',
                     title='this is menu2',
