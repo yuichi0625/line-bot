@@ -6,7 +6,7 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     MessageEvent, TextMessage, TemplateSendMessage, CarouselTemplate, CarouselColumn,
-    PostbackAction, MessageAction, URIAction)
+    PostbackAction, MessageAction, URIAction, PostBackEvent)
 
 app = Flask(__name__)
 
@@ -39,6 +39,11 @@ def callback():
         abort(400)
 
     return 'OK'
+
+
+@handler.add(PostBackEvent)
+def handle_postback(event):
+    print(event)
 
 
 @handler.add(MessageEvent, message=TextMessage)
