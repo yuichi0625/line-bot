@@ -23,8 +23,8 @@ def retrieve_line_list(pref):
         lines = {record.line for record in _retrieve_data(sql)}
         if lines:
             text = ''
-            for line in lines:
-                text += f'    {line}\n'
+            for line in sorted(list(lines)):
+                text += f'{line}\n'
         else:
             text = '都道府県が見つかりません。\n（「都道府県」も忘れずにつけてください。）'
     return text.strip()
