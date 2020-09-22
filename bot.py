@@ -113,7 +113,7 @@ class Bot:
                 sql = f"SELECT station FROM stations WHERE pref = '{pref_or_line}';"
             stations = {record.station for record in self._retrieve_data(sql)}
             if stations:
-                station = random.choice(stations)
+                station = random.choice(list(stations))
                 text = f'{station}駅！'
             else:
                 text = '都道府県／路線が見つかりません。'
