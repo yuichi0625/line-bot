@@ -6,7 +6,7 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     MessageEvent, TextMessage, TemplateSendMessage, CarouselTemplate, CarouselColumn,
-    PostbackAction, MessageAction, URIAction, PostBackEvent)
+    PostbackAction, MessageAction, URIAction, PostbackEvent)
 
 app = Flask(__name__)
 
@@ -27,21 +27,18 @@ def hello_world():
 def callback():
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
-
     # get request body as text
     body = request.get_data(as_text=True)
     app.logger.info("Request body: " + body)
-
     # handle webhook body
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
         abort(400)
-
     return 'OK'
 
 
-@handler.add(PostBackEvent)
+@handler.add(PostbackEvent)
 def handle_postback(event):
     print(event)
 
