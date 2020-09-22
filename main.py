@@ -4,9 +4,9 @@ import os
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
-
-from bot import Bot
+from linebot.models import (
+    MessageEvent, TextMessage, TemplateSendMessage, CarouselTemplate, CarouselColumn,
+    PostbackAction, MessageAction, URIAction)
 
 app = Flask(__name__)
 
@@ -16,8 +16,6 @@ YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
 
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
-
-bot = Bot()
 
 
 @app.route("/")
@@ -45,16 +43,44 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    # input_text = event.message.text
-    # output_text = bot.reply_to_text(input_text)
-    # if output_text is not None:
-    #     line_bot_api.reply_message(
-    #         event.reply_token,
-    #         TextSendMessage(text=output_text))
-    insight = line_bot_api.get_insight_demographic()
-    print(insight)
-    print(insight.genders)
-    print(insight.areas)
+    carousel_template_message = TemplateSendMessage(
+        alt_text='Carousel template',
+        template=CarouselTemplate(
+            columns=[
+                CarouselColumn(
+                    thumbnail_image_url='https://example.com/item1.jpg',
+                    title='this is menu1',
+                    text='description1',
+                    actions=[
+                        PostbackAction(
+                            label='postback1',
+                            display_text='postback text1',
+                            data='action=buy&itemid=1'),
+                        MessageAction(
+                            label='message1',
+                            text='message text1'),
+                        URIAction(
+                            label='uri1',
+                            uri='http://example.com/1')]),
+                CarouselColumn(
+                    thumbnail_image_url='https://example.com/item2.jpg',
+                    title='this is menu2',
+                    text='description2',
+                    actions=[
+                        PostbackAction(
+                            label='postback2',
+                            display_text='postback text2',
+                            data='action=buy&itemid=2'),
+                        MessageAction(
+                            label='message2',
+                            text='message text2'),
+                        URIAction(
+                            label='uri2',
+                            uri='http://example.com/2')])]))
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        messages=carousel_template_message)
 
 
 if __name__ == "__main__":
