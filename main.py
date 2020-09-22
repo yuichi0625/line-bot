@@ -55,7 +55,7 @@ def handle_message(event):
                         PostbackAction(
                             label='postback1',
                             display_text='postback text1',
-                            data='action=buy&itemid=1'),
+                            data='asdf'),
                         MessageAction(
                             label='message1',
                             text='message text1'),
@@ -78,7 +78,7 @@ def handle_message(event):
                             label='uri2',
                             uri='http://example.com/2')])]))
 
-    print(event.message.text)
+    print(event)
 
     line_bot_api.reply_message(
         event.reply_token,
