@@ -55,7 +55,7 @@ def handle_message(event):
         template=CarouselTemplate(
             columns=[
                 CarouselColumn(
-                    # thumbnail_image_url='https://example.com/item1.jpg',
+                    thumbnail_image_url='https://example.com/item1.jpg',
                     title='路線一覧',
                     text='各都道府県の路線一覧を表示',
                     actions=[
