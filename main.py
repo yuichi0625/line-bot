@@ -61,7 +61,7 @@ def handle_message(event):
                     actions=[
                         PostbackAction(
                             label='都道府県を入力',
-                            # display_text='postback text1',
+                            #display_text='test',
                             data='show_line_list')]),
                 CarouselColumn(
                     thumbnail_image_url='https://example.com/item2.jpg',
@@ -71,13 +71,7 @@ def handle_message(event):
                         PostbackAction(
                             label='postback2',
                             display_text='postback text2',
-                            data='action=buy&itemid=2'),
-                        MessageAction(
-                            label='message2',
-                            text='message text2'),
-                        URIAction(
-                            label='uri2',
-                            uri='http://example.com/2')])]))
+                            data='action=buy&itemid=2')])]))
 
     print(event)
 
