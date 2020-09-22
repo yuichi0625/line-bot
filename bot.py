@@ -64,7 +64,7 @@ class Bot:
             msg = self.retrieve_line_list(text)
         # ランダム
         elif text == RANDOM:
-            text = '都道府県名か路線名を入力してください。'
+            msg = '都道府県名か路線名を入力してください。'
             self.mode = RANDOM
         elif self.mode == RANDOM:
             msg = self.retrieve_random_station(text)
