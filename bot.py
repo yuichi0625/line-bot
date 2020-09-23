@@ -6,8 +6,7 @@ from collections import defaultdict
 import numpy as np
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
-from linebot.models import (
-    TemplateSendMessage, TextSendMessage, PostbackAction, ButtonsTemplate)
+from linebot.models import TemplateSendMessage, PostbackAction, ButtonsTemplate
 
 
 class Bot:
@@ -78,7 +77,7 @@ class RandomlyStationExtractor(Bot):
                 station = random.choice(stations)
                 output = f'{station}駅！'
             else:
-                lines = [line for line in self.lines if line.endswith(pref_or_line)]
+                lines = sorted([line for line in self.lines if line.endswith(pref_or_line)])
                 if len(lines) > 1:
                     return self._create_buttons_template(
                         alt_text='路線名重複確認',
@@ -143,8 +142,8 @@ class CenterStationCalculator(Bot):
             output = ''
             if self.coords:
                 coord = np.mean(self.coords, axis=0)
-                min_lon, max_lon = coord[0] - 0.08, coord[0] + 0.08
-                min_lat, max_lat = coord[1] - 0.06, coord[1] + 0.06
+                min_lon, max_lon = coord[0] - 0.04, coord[0] + 0.04
+                min_lat, max_lat = coord[1] - 0.03, coord[1] + 0.03
                 sql = f"SELECT station, line, lon, lat FROM stations WHERE (lon BETWEEN {min_lon} AND {max_lon}) AND (lat BETWEEN {min_lat} AND {max_lat});"
                 st_lines = defaultdict(list)
                 st_coords = defaultdict(list)
