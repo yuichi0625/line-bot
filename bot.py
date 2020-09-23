@@ -74,10 +74,7 @@ class CenterStationCalculator(Bot):
     def reply_to_postback(self, station_pref):
         if station_pref is not None:
             station, pref = station_pref.split('+')
-            print(f'coords: {self.coords}')
-            d = self.duplicated.pop(station)[pref]
-            print(f'd: {d}')
-            self.coords.append[d]
+            self.coords.append(self.duplicated.pop(station)[pref])
         if self.duplicated:
             station = list(self.duplicated.keys())[0]
             prefs = sorted(list(self.duplicated[station].keys()))
