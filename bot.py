@@ -7,7 +7,7 @@ import numpy as np
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 from linebot.models import (
-    TemplateSendMessage, CarouselTemplate, CarouselColumn, TextSendMessage, PostbackAction, ButtonsTemplate)
+    TemplateSendMessage, TextSendMessage, PostbackAction, ButtonsTemplate)
 
 
 class Bot:
@@ -86,4 +86,11 @@ class CenterStationCalculator(Bot):
                 datas=[f'{station}+{pref}' for pref in prefs])
         else:
             coord = np.mean(self.coords, axis=0)
-            print(coord)
+            min_lon, max_lon = coord[0] - 0.08, coord[0] + 0.08
+            min_lat, max_lat = coord[1] - 0.06, coord[1] + 0.06
+            sql = f"SELECT station, line, lon, lat FROM stations WHERE (lon BETWEEN {min_lon} AND {max_lon}) AND (lat BETWEEN {min_lat} AND {max_lat});"
+            records = self._retrieve_data(sql)
+            print(len(records))
+
+    def _reset(self):
+        self.__init__()
