@@ -83,7 +83,7 @@ class CenterStationCalculator(Bot):
                 title='駅名重複確認',
                 text=f'{station}駅が複数の都道府県に存在します。正しい方を選んでください。',
                 labels=prefs,
-                datas=[f'{station}+{pref}' for pref in pref])
+                datas=[f'{station}+{pref}' for pref in prefs])
         else:
             coord = np.mean(self.coords, axis=0)
             print(coord)
