@@ -73,6 +73,8 @@ class CenterStationCalculator(Bot):
 
     def reply_to_postback(self, station_pref):
         if station_pref is not None:
+            print(f'station_pref: {station_pref}')
+            print(f'duplicated: {self.duplicated}')
             station, pref = station_pref.split('+')
             self.coords.append[self.duplicated.pop(station)[pref]]
         if self.duplicated:
