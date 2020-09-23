@@ -60,18 +60,19 @@ class CenterStationCalculator(Bot):
         self.duplicated = {}
 
     def reply_to_message(self, str_stations):
-        stations = [st for st in self.regex.split(str_stations) if st]
-        for station in stations:
-            sql = f"SELECT pref, lon, lat FROM stations WHERE station = '{station}';"
-            pref_coords = defaultdict(list)
-            for record in self._retrieve_data(sql):
-                pref_coords[record.pref].append([record.lon, record.lat])
-            pref_coord = {pref: np.mean(coords, axis=0) for pref, coords in pref_coords.items()}
-            if len(pref_coord) > 1:
-                self.duplicated[station] = pref_coord
-            elif len(pref_coord) == 1:
-                self.coords.append(list(pref_coord.values())[0])
-        return self.reply_to_postback(None)
+        if not self.coords:
+            stations = [st for st in self.regex.split(str_stations) if st]
+            for station in stations:
+                sql = f"SELECT pref, lon, lat FROM stations WHERE station = '{station}';"
+                pref_coords = defaultdict(list)
+                for record in self._retrieve_data(sql):
+                    pref_coords[record.pref].append([record.lon, record.lat])
+                pref_coord = {pref: np.mean(coords, axis=0) for pref, coords in pref_coords.items()}
+                if len(pref_coord) > 1:
+                    self.duplicated[station] = pref_coord
+                elif len(pref_coord) == 1:
+                    self.coords.append(list(pref_coord.values())[0])
+            return self.reply_to_postback(None)
 
     def reply_to_postback(self, station_pref):
         if station_pref is not None:
@@ -102,13 +103,18 @@ class CenterStationCalculator(Bot):
             for station in [z[1] for z in sorted(zip(dists, st_coord.keys()))[:5]]:
                 lines = sorted(st_lines[station])
                 if len(lines) > 1:
-                    output += f'{station}駅（{lines[0]} etc.）'
+                    output += f'{station}駅（{lines[0]} etc.）\n'
                 else:
-                    output += f'{station}駅（{lines[0]}）'
+                    output += f'{station}駅（{lines[0]}）\n'
             self._reset_variables()
-            return output
+            return output.strip()
 
     @staticmethod
     def calc_distance(x_y):
+        """
+        np.apply_along_axisで使う距離計算用関数
+        Args:
+            x_y ()
+        """
         x, y = x_y
         return np.sqrt(x**2 + y**2)
