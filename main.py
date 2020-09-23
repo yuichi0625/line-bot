@@ -20,7 +20,7 @@ YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
-line_list_displayer = LineListDisplayer()
+list_displayer = LineListDisplayer()
 random_extractor = RandomlyStationExtractor()
 center_calculator = CenterStationCalculator()
 
@@ -69,37 +69,41 @@ def callback():
     return 'OK'
 
 
-@handler.add(PostbackEvent)
-def handle_postback(event):
-    data = event.postback.data
-    if data == DISPLAY:
-        msg = '都道府県名を入力してください。'
-        line_list_displayer.in_operation = True
-    elif data == RANDOM:
-        msg = '都道府県名か路線名を入力してください。'
-        random_extractor.in_operation = True
-    elif data == CENTER:
-        msg = '駅名を入力してください。'
-        center_calculator.in_operation = True
-    elif center_calculator.in_operation:
-        msg = center_calculator.reply_to_postback(data)
-    if isinstance(msg, str):
-        msg = TextSendMessage(text=msg)
-    line_bot_api.reply_message(event.reply_token, messages=msg)
-
-
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = None
     text = event.message.text.strip()
     if text == '集合場所':
         msg = CAROUSEL_TEMPLATE
+    elif list_displayer.in_operation:
+        msg = list_displayer.reply_to_message(text)
     elif center_calculator.in_operation:
         msg = center_calculator.reply_to_message(text)
     if isinstance(msg, str):
         msg = TextSendMessage(text=msg)
     if msg is not None:
         line_bot_api.reply_message(event.reply_token, messages=msg)
+
+
+@handler.add(PostbackEvent)
+def handle_postback(event):
+    data = event.postback.data
+    if data == DISPLAY:
+        msg = '都道府県名を入力してください。'
+        list_displayer.in_operation = True
+    elif data == RANDOM:
+        msg = '都道府県名か路線名を入力してください。'
+        random_extractor.in_operation = True
+    elif data == CENTER:
+        msg = '駅名を入力してください。'
+        center_calculator.in_operation = True
+    elif random_extractor.in_operation:
+        msg = random_extractor.reply_to_postback(data)
+    elif center_calculator.in_operation:
+        msg = center_calculator.reply_to_postback(data)
+    if isinstance(msg, str):
+        msg = TextSendMessage(text=msg)
+    line_bot_api.reply_message(event.reply_token, messages=msg)
 
 
 if __name__ == "__main__":

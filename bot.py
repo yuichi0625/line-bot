@@ -46,10 +46,59 @@ class LineListDisplayer(Bot):
     def __init__(self):
         super().__init__()
 
+    def reply_to_message(self, pref):
+        output = ''
+        if pref in self.PREF_EXCEPTIONS:
+            output += self.PREF_EXCEPTION_MSG
+        else:
+            sql = f"SELECT line FROM stations WHERE pref = '{pref}';"
+            records = self._retrieve_data(sql)
+            if records:
+                for record in records:
+                    output += f'{record.line}\n'
+            else:
+                output += '有効な都道府県名が見つかりませんでした。'
+        self._reset_variables()
+        return output.strip()
+
 
 class RandomlyStationExtractor(Bot):
     def __init__(self):
         super().__init__()
+        self.lines = []
+
+    def reply_to_message(self, pref_or_line):
+        if not self.lines:
+            self.lines = list(
+                {record.line for record in self._retrieve_data("SELECT line FROM stations;")})
+            pref_sql = f"SELECT station FROM stations WHERE pref = '{pref_or_line}';"
+            pref_records = self._retrieve_data(pref_sql)
+            if pref_records:
+                stations = [record.station for record in pref_records]
+                station = random.choice(stations)
+                return f'{station}駅！'
+            else:
+                lines = [line for line in self.lines if line.endswith(pref_or_line)]
+                if len(lines) > 1:
+                    return self._create_buttons_template(
+                        alt_text='路線名重複確認',
+                        title='路線名重複確認',
+                        text=f'{pref_or_line}のつく路線が複数存在します。正しい方を選んでください。',
+                        labels=lines,
+                        datas=lines)
+                elif len(lines) == 1:
+                    line_sql = f"SELECT station FROM stations WHERE line = '{lines[0]}';"
+                    stations = [record.station for record in self._retrieve_data(line_sql)]
+                    station = random.choice(stations)
+                    return f'{station}駅！'
+                else:
+                    return '有効な都道府県名／路線名が見つかりませんでした。'
+
+    def reply_to_postback(self, line):
+        sql = f"SELECT station FROM stations WHERE line = '{line}';"
+        stations = [record.station for record in self._retrieve_data(sql)]
+        station = random.choice(stations)
+        return f'{station}駅！'
 
 
 class CenterStationCalculator(Bot):
