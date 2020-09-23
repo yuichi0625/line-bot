@@ -54,8 +54,8 @@ class LineListDisplayer(Bot):
             sql = f"SELECT line FROM stations WHERE pref = '{pref}';"
             records = self._retrieve_data(sql)
             if records:
-                for record in records:
-                    output += f'{record.line}\n'
+                for line in sorted(list({record.line for record in records})):
+                    output += f'{line}\n'
             else:
                 output += '有効な都道府県名が見つかりませんでした。'
         self._reset_variables()
@@ -76,7 +76,7 @@ class RandomlyStationExtractor(Bot):
             if pref_records:
                 stations = [record.station for record in pref_records]
                 station = random.choice(stations)
-                return f'{station}駅！'
+                output = f'{station}駅！'
             else:
                 lines = [line for line in self.lines if line.endswith(pref_or_line)]
                 if len(lines) > 1:
@@ -90,14 +90,17 @@ class RandomlyStationExtractor(Bot):
                     line_sql = f"SELECT station FROM stations WHERE line = '{lines[0]}';"
                     stations = [record.station for record in self._retrieve_data(line_sql)]
                     station = random.choice(stations)
-                    return f'{station}駅！'
+                    output = f'{station}駅！'
                 else:
-                    return '有効な都道府県名／路線名が見つかりませんでした。'
+                    output = '有効な都道府県名／路線名が見つかりませんでした。'
+            self._reset_variables()
+            return output
 
     def reply_to_postback(self, line):
         sql = f"SELECT station FROM stations WHERE line = '{line}';"
         stations = [record.station for record in self._retrieve_data(sql)]
         station = random.choice(stations)
+        self._reset_variables()
         return f'{station}駅！'
 
 
