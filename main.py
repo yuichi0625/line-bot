@@ -77,6 +77,8 @@ def handle_message(event):
         msg = CAROUSEL_TEMPLATE
     elif list_displayer.in_operation:
         msg = list_displayer.reply_to_message(text)
+    elif random_extractor.in_operation:
+        msg = random_extractor.reply_to_message(text)
     elif center_calculator.in_operation:
         msg = center_calculator.reply_to_message(text)
     if isinstance(msg, str):
