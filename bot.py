@@ -76,6 +76,7 @@ class CenterStationCalculator(Bot):
             station, pref = station_pref.split('+')
             print(f'coords: {self.coords}')
             d = self.duplicated.pop(station)[pref]
+            print(f'd: {d}')
             self.coords.append[d]
         if self.duplicated:
             station = list(self.duplicated.keys())[0]
