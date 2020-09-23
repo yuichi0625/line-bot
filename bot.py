@@ -38,6 +38,9 @@ class Bot:
             template=ButtonsTemplate(
                 title=title, text=text, actions=actions))
 
+    def _reset_variables(self):
+        self.__init__()
+
 
 class LineListDisplayer(Bot):
     def __init__(self):
@@ -60,11 +63,10 @@ class CenterStationCalculator(Bot):
         stations = [st for st in self.regex.split(str_stations) if st]
         for station in stations:
             sql = f"SELECT pref, lon, lat FROM stations WHERE station = '{station}';"
-            records = self._retrieve_data(sql)
             pref_coords = defaultdict(list)
-            for record in records:
+            for record in self._retrieve_data(sql):
                 pref_coords[record.pref].append([record.lon, record.lat])
-            pref_coord = {pref: np.mean(lon_lats, axis=0) for pref, lon_lats in pref_coords.items()}
+            pref_coord = {pref: np.mean(coords, axis=0) for pref, coords in pref_coords.items()}
             if len(pref_coord) > 1:
                 self.duplicated[station] = pref_coord
             elif len(pref_coord) == 1:
@@ -89,8 +91,24 @@ class CenterStationCalculator(Bot):
             min_lon, max_lon = coord[0] - 0.08, coord[0] + 0.08
             min_lat, max_lat = coord[1] - 0.06, coord[1] + 0.06
             sql = f"SELECT station, line, lon, lat FROM stations WHERE (lon BETWEEN {min_lon} AND {max_lon}) AND (lat BETWEEN {min_lat} AND {max_lat});"
-            records = self._retrieve_data(sql)
-            print(len(records))
+            st_lines = defaultdict(list)
+            st_coords = defaultdict(list)
+            for record in self._retrieve_data(sql):
+                st_lines[record.station].append(record.line)
+                st_coords[record.station].append([record.lon, record.lat])
+            st_coord = {st: np.mean(coords, axis=0) for st, coords in st_coords.items()}
+            dists = np.apply_along_axis(self.calc_distance, 1, np.array(list(st_coord.values())) - coord)
+            output = ''
+            for station in [z[1] for z in sorted(zip(dists, st_coord.keys()))[:5]]:
+                lines = sorted(st_lines[station])
+                if len(lines) > 1:
+                    output += f'{station}駅（{lines[0]} etc.）'
+                else:
+                    output += f'{station}駅（{lines[0]}）'
+            self._reset_variables()
+            return output
 
-    def _reset(self):
-        self.__init__()
+    @staticmethod
+    def calc_distance(x_y):
+        x, y = x_y
+        return np.sqrt(x**2 + y**2)
