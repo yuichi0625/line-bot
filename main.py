@@ -95,7 +95,7 @@ def handle_message(event):
     if text == '集合場所':
         msg = CAROUSEL_TEMPLATE
     elif center_calculator.in_operation:
-        center_calculator.reply_to_message(text)
+        msg = center_calculator.reply_to_message(text)
     if isinstance(msg, str):
         msg = TextSendMessage(text=msg)
     if msg is not None:
