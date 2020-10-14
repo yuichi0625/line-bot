@@ -71,25 +71,39 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    """LINEへのメッセージを受け取る関数
+    """
     msg = None
     text = event.message.text.strip()
+
+    # 「集合場所」を受け取った場合、起動の合図
     if text == '集合場所':
         msg = CAROUSEL_TEMPLATE
+    # もしくは、PostbackActionへの返信を受け取った場合
     elif list_displayer.in_operation:
         msg = list_displayer.reply_to_message(text)
     elif random_extractor.in_operation:
         msg = random_extractor.reply_to_message(text)
     elif center_calculator.in_operation:
         msg = center_calculator.reply_to_message(text)
+
+    # テキストメッセージはTextSendMessageでラップしないと送れない
+    # ちなみに、テンプレートの場合はそのまま送れる
     if isinstance(msg, str):
         msg = TextSendMessage(text=msg)
+
+    # 関係ないメッセージの場合は何もしない
     if msg is not None:
         line_bot_api.reply_message(event.reply_token, messages=msg)
 
 
 @handler.add(PostbackEvent)
 def handle_postback(event):
+    """PostbackActionを受け取る関数
+    """
     data = event.postback.data
+
+    # CarouselTemplateでボタンが押された場合
     if data == DISPLAY:
         msg = '都道府県名を入力してください。'
         list_displayer.in_operation = True
@@ -99,12 +113,17 @@ def handle_postback(event):
     elif data == CENTER:
         msg = '駅名を入力してください。'
         center_calculator.in_operation = True
+    # もしくは、重複確認のButtonsTemplateでボタンが押された場合
     elif random_extractor.in_operation:
         msg = random_extractor.reply_to_postback(data)
     elif center_calculator.in_operation:
         msg = center_calculator.reply_to_postback(data)
+
+    # テキストメッセージはTextSendMessageでラップしないと送れない
+    # ちなみに、テンプレートの場合はそのまま送れる
     if isinstance(msg, str):
         msg = TextSendMessage(text=msg)
+
     line_bot_api.reply_message(event.reply_token, messages=msg)
 
 
