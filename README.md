@@ -5,7 +5,7 @@
 ## 目次
 - [準備](#準備)
     - [データの取得](#データの取得)
-    - [LINE DevelopersとHerokuの登録・設定](#LINE-DevelopersとHerokuの登録・設定)
+    - [LINE DevelopersとHerokuの登録・設定](#LINE-DevelopersとHerokuの登録設定)
     - [データをHeroku Postgresに投入](#データをHeroku-Postgresに投入)
 - [使い方](#使い方)
     - [路線一覧の表示](#路線一覧の表示)
